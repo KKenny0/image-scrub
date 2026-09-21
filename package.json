@@ -1,0 +1,17 @@
+{
+  "name": "image-scrub",
+  "version": "1.0.0",
+  "description": "AI 图像去痕与截屏仿真清洗工具 - 阻断 AIGC 标识与频域指纹，模拟自然截屏防平台降权",
+  "type": "module",
+  "bin": {
+    "image-scrub": "./scripts/image-scrub.mjs"
+  },
+  "scripts": {
+    "test": "node scripts/selftest.mjs"
+  },
+  "author": "Antigravity",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
