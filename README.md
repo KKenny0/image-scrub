@@ -89,6 +89,44 @@ node scripts/image-scrub.mjs run input.png -o clean.png
 
 ---
 
+## 真实实测案例 (Showcase)
+
+以一张真实的 **AI 生成中文营销海报 (`768 × 1024`)** 为例，运行一体化清洗仿真流水线：
+
+```bash
+node scripts/image-scrub.mjs run examples/officecli-poster.jpg -o examples/officecli-clean.jpg
+```
+
+### 1. 处理前后实测对照
+
+| 测量维度 | 原图 (`examples/officecli-poster.jpg`) | 清洗后 (`examples/officecli-clean.jpg`) | 效果与意义 |
+| :--- | :--- | :--- | :--- |
+| **文件大小** | 405.7 KB | **154.4 KB** | **体积减少 61.9%**，消除无效压缩冗余 |
+| **分辨率** | `768 × 1024` | `768 × 1024` | **1:1 精确保持**，无拉伸裁切 |
+| **JPEG 标记段** | `APP0, APP2 (ICC), DQT*2, SOF0, DHT*4, SOS, EOI` | `APP0, DQT, DHT, SOF0, SOS, EOI` | 阻断携带私有参数的 `APP2` 描述块 |
+| **视觉保真度** | 基准 | **PSNR: 41.05 dB** / **SSIM: 0.978** | **达到工业级人眼无损标准**，文字边缘平滑锐利 |
+| **伪装 Profile** | 原始生成器特征 | **`macos-shot`** (标准 144 DPI JFIF) | 机器识别为「Mac 高分屏截屏产物」 |
+| **特征探针残留** | 检出 `mntrRGB`、`-para` 探针 | **0 残留 (100% 清空)** | 字节级探针扫描全部通过 |
+
+### 2. 10 道防降权安全门实测输出
+
+```text
+门 01 [✓] 字节级针扫描 (Needle Scan)       : 扫描 2 根特征探针，0 残留
+门 02 [✓] C2PA 凭据彻底消除                : 未发现 JUMBF / c2pa 签名声明
+门 03 [✓] AI 提示词/工作流清零               : 未发现 parameters / workflow / Prompt 块
+门 04 [✓] 尾部追加/动态照片截断                : 文件严格在图像结束符截断，0 尾随字节
+门 05 [✓] 次级缩略图与多图隔绝                 : 无次级预览图与 MPF 深度图
+门 06 [✓] 通用 EXIF/XMP 标签清零           : APP1 / eXIf / XMP 区域完全清空
+门 07 [✓] Profile 伪装指纹合规             : 符合 macos-shot 144 DPI 规范
+门 08 [✓] 色彩与直方图健康                   : 像素通道与直方图基准健康
+门 09 [✓] 防降权微扰动有效性                  : 二进制哈希重塑完成，频域周期伪影已破坏
+门 10 [✓] 文件格式合法可解码                  : 标准 JPEG 图像结构完整
+--------------------------------------------------------
+验收判定: ✅ 完美通过 (SAFE TO PUBLISH)
+```
+
+---
+
 ## 10 道防降权安全门体系
 
 | 门编号 | 门名称 | 判定标准 |

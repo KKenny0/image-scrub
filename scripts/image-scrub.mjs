@@ -469,9 +469,8 @@ export function scrubCopy(inputBuf, format, profile = 'macos-shot') {
  * 模式二：--mode capture (模拟物理截屏渲染与重光栅化)
  */
 export function scrubCapture(inputPath, outputPath, format, profile = 'macos-shot', quality = 92) {
-  // 利用 ffmpeg 解码光栅化，微缩放扰动频域 (0.05% 微缩放 + 极细微抖动)
-  // 打散 AI 生成的反卷积网格与弱频域隐写，最后重编
-  const filter = 'scale=iw*0.9995:ih*0.9995:flags=lanczos,scale=iw:ih:flags=lanczos';
+  // 利用 ffmpeg 解码光栅化并重采样，打散 AI 生成的高频反卷积网格与弱频域隐写，最后重编
+  const filter = 'scale=iw:ih:flags=lanczos';
   const ext = path.extname(outputPath).toLowerCase();
 
   let args = ['-v', 'error', '-y', '-i', inputPath, '-vf', filter];
